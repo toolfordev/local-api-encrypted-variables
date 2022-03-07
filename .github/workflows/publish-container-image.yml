@@ -1,0 +1,15 @@
+name: publish-container-image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+
+  publish-container-images:
+    uses: tmdcommunity/actions/.github/workflows/publish-container-image.yml@main
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      QUAYIO_USERNAME: ${{ secrets.QUAYIO_USERNAME }}
+      QUAYIO_PASSWORD: ${{ secrets.QUAYIO_PASSWORD }}
