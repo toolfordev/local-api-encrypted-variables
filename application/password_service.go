@@ -7,7 +7,6 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/toolfordev/local-api-encrypted-variables/models"
@@ -70,26 +69,21 @@ func (service *PasswordService) Encrypt(variable *models.EncryptedVariable) (err
 		err = errors.New("toolfordev locked please unlock")
 		return
 	}
-	key, err := hex.DecodeString(service.password)
+	text := []byte(variable.Value)
+	key := []byte(service.password)
+	c, err := aes.NewCipher(key)
 	if err != nil {
 		return
 	}
-	plaintext := []byte(variable.Value)
-	block, err := aes.NewCipher(key)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
 		return
 	}
-	aesGCM, err := cipher.NewGCM(block)
-	if err != nil {
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		return
 	}
-	nonce := make([]byte, aesGCM.NonceSize())
-	_, err = io.ReadFull(rand.Reader, nonce)
-	if err != nil {
-		return
-	}
-	ciphertext := aesGCM.Seal(nonce, nonce, plaintext, nil)
-	variable.EncryptedValue = fmt.Sprintf("%x", ciphertext)
+	variable.EncryptedValue = gcm.Seal(nonce, nonce, text, nil)
 	return
 }
 
@@ -98,23 +92,29 @@ func (service *PasswordService) Decrypt(variable *models.EncryptedVariable) (err
 		err = errors.New("toolfordev locked please unlock")
 		return
 	}
-	key, _ := hex.DecodeString(service.password)
-	enc, _ := hex.DecodeString(variable.EncryptedValue)
-	block, err := aes.NewCipher(key)
+	key := []byte(service.password)
+	ciphertext := variable.EncryptedValue
 	if err != nil {
 		return
 	}
-	aesGCM, err := cipher.NewGCM(block)
+	c, err := aes.NewCipher(key)
 	if err != nil {
 		return
 	}
-	nonceSize := aesGCM.NonceSize()
-	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
-	plaintext, err := aesGCM.Open(nil, nonce, ciphertext, nil)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
 		return
 	}
-	variable.Value = fmt.Sprintf("%s", plaintext)
+	nonceSize := gcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return
+	}
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return
+	}
+	variable.Value = string(plaintext)
 	return
 }
 

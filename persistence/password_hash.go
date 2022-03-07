@@ -2,11 +2,10 @@ package persistence
 
 import (
 	"github.com/toolfordev/local-api-encrypted-variables/models"
-	"gorm.io/gorm"
 )
 
 type PasswordHashEntity struct {
-	gorm.Model
+	ID    uint `gorm:"primarykey"`
 	Value string
 }
 

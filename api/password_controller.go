@@ -19,13 +19,11 @@ func (PasswordController) GetRoutes() []router.Route {
 				err.Err = errFunc
 				return
 			}
-			result.Model = model
-			result.StatusCode = http.StatusCreated
+			result.StatusCode = http.StatusOK
 			return
 		}},
 		{Path: "/password/lock", Method: http.MethodPatch, UseRequestModel: false, HandleFunc: func(service *application.PasswordService) (result router.Result, err router.Error) {
 			service.Lock()
-			result.Model = models.Password{}
 			result.StatusCode = http.StatusOK
 			return
 		}},
@@ -35,7 +33,6 @@ func (PasswordController) GetRoutes() []router.Route {
 				err.Err = errFunc
 				return
 			}
-			result.Model = model
 			result.StatusCode = http.StatusOK
 			return
 		}},

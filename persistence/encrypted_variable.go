@@ -2,13 +2,12 @@ package persistence
 
 import (
 	"github.com/toolfordev/local-api-encrypted-variables/models"
-	"gorm.io/gorm"
 )
 
 type EncryptedVariableEntity struct {
-	gorm.Model
+	ID             uint   `gorm:"primarykey"`
 	Name           string `gorm:"unique"`
-	EncryptedValue string
+	EncryptedValue []byte
 }
 
 type EncryptedVariableConverter struct {

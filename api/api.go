@@ -12,5 +12,6 @@ type EncryptedVariableApi struct {
 func (api *EncryptedVariableApi) Init(manager *dependencies.Manager) {
 	api.router.Init(manager)
 	api.router.AddController(EncryptedVariableController{})
-	api.router.ListenAndServe()
+	api.router.AddController(PasswordController{})
+	api.router.ListenAndServe(":14000")
 }

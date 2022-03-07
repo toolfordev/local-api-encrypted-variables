@@ -15,11 +15,6 @@ func main() {
 	manager.Add(&persistence.EncryptedVariableRepository{})
 	manager.Add(&application.PasswordService{})
 	manager.Add(&application.EncryptedVariableService{})
-
-	manager.CallFunc(func(database *persistence.ToolForDevDatabase) {
-
-	})
-
 	api := api.EncryptedVariableApi{}
 	api.Init(manager)
 }
